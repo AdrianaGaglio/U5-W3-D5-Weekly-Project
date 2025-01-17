@@ -1,14 +1,9 @@
 package epicode.it.events.entities.users.planner;
 
-import epicode.it.events.entities.users.EventUser.dto.EventUserCreateRequest;
-import epicode.it.events.entities.users.EventUser.dto.EventUserUpdateRequest;
-import epicode.it.events.entities.users.participant.Participant;
-import epicode.it.events.entities.users.utils.Utils;
-import jakarta.persistence.EntityExistsException;
+import epicode.it.events.entities.users.planner.dto.PlannerResponse;
+import epicode.it.events.entities.users.planner.dto.PlannerResponseMapper;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,14 +14,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlannerSvc {
     private final PlannerRepo plannerRepo;
+    private final PlannerResponseMapper mapper;
 
-    public List<Planner> getAll() {
+    public List<PlannerResponse> getAll() {
 
-        return plannerRepo.findAll();
+        return mapper.toPlannerResponseList(plannerRepo.findAll());
     }
 
-    public Page<Planner> getAllPageable(Pageable pageable) {
-        return plannerRepo.findAll(pageable);
+    public Page<PlannerResponse> getAllPageable(Pageable pageable) {
+        Page<Planner> pagedParticipant = plannerRepo.findAll(pageable);
+        Page<PlannerResponse> response = pagedParticipant.map(e -> {
+            PlannerResponse participantResponse = mapper.toPlannerResponse(e);
+            return participantResponse;
+        });
+        return response;
     }
 
     public Planner getById(Long id) {

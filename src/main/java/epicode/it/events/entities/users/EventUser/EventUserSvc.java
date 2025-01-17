@@ -3,6 +3,8 @@ package epicode.it.events.entities.users.EventUser;
 import epicode.it.events.auth.appuser.AppUserRepo;
 import epicode.it.events.auth.appuser.AppUserSvc;
 import epicode.it.events.entities.users.EventUser.dto.EventUserCreateRequest;
+import epicode.it.events.entities.users.EventUser.dto.EventUserMapper;
+import epicode.it.events.entities.users.EventUser.dto.EventUserResponse;
 import epicode.it.events.entities.users.EventUser.dto.EventUserUpdateRequest;
 import epicode.it.events.entities.users.participant.Participant;
 import epicode.it.events.entities.users.planner.Planner;
@@ -23,14 +25,20 @@ import java.util.List;
 public class EventUserSvc {
     private final EventUserRepo eventUserRepo;
     private final AppUserRepo appUserRepo;
+    private final EventUserMapper mapper;
 
-    public List<EventUser> getAll() {
-        return eventUserRepo.findAll();
+    public List<EventUserResponse> getAll() {
+        return mapper.toEventUserResponseList(eventUserRepo.findAll());
     }
 
-    public Page<EventUser> getAllPageable(Pageable pageable) {
+    public Page<EventUserResponse> getAllPageable(Pageable pageable) {
+        Page<EventUser> pagedEventUsers = eventUserRepo.findAll(pageable);
+        Page<EventUserResponse> response = pagedEventUsers.map(e -> {
+            EventUserResponse eventUserResponse = mapper.toEventUserResponse(e);
+            return eventUserResponse;
+        });
+        return response;
 
-        return eventUserRepo.findAll(pageable);
     }
 
     public EventUser getById(Long id) {
@@ -54,11 +62,11 @@ public class EventUserSvc {
         return "User deleted successfully";
     }
 
-    public EventUser getByNameAndSurname(String name, String surname) {
-        return eventUserRepo.findByNameAndSurname(name, surname);
+    public EventUserResponse getByNameAndSurname(String name, String surname) {
+        return mapper.toEventUserResponse(eventUserRepo.findByNameAndSurname(name, surname));
     }
 
-    public EventUser create(@Valid EventUserCreateRequest request, boolean isPlanner) {
+    public EventUserResponse create(@Valid EventUserCreateRequest request, boolean isPlanner) {
         if (eventUserRepo.existsByNameAndSurname(request.getName(), request.getSurname()))
             throw new EntityExistsException("Planner already exists");
 
@@ -67,12 +75,12 @@ public class EventUserSvc {
         boolean hasImage = request.getImage() != null && !request.getImage().isEmpty();
         u.setImage(hasImage ? request.getImage() : Utils.getAvatar(u));
         u.setAppUser(appUserRepo.findById(request.getUserId()).orElse(null));
-        return eventUserRepo.save(u);
+        return mapper.toEventUserResponse(eventUserRepo.save(u));
     }
 
-    public EventUser update(Long id, @Valid EventUserUpdateRequest request) {
+    public EventUserResponse update(Long id, @Valid EventUserUpdateRequest request) {
         EventUser u = getById(id);
         BeanUtils.copyProperties(request, u);
-        return eventUserRepo.save(u);
+        return mapper.toEventUserResponse(eventUserRepo.save(u));
     }
 }

@@ -1,11 +1,15 @@
 package epicode.it.events.entities.event;
 
+
 import epicode.it.events.entities.event.dto.EventCreateRequest;
+import epicode.it.events.entities.event.dto.EventResponse;
+import epicode.it.events.entities.event.dto.EventResponseMapper;
 import epicode.it.events.entities.event.dto.EventUpdateRequest;
 import epicode.it.events.entities.users.planner.Planner;
 import epicode.it.events.entities.users.planner.PlannerRepo;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -23,17 +27,21 @@ import java.util.List;
 public class EventSvc {
     private final EventRepo eventRepo;
     private final PlannerRepo plannerRepo;
+    private final EventResponseMapper mapper;
 
-    public List<Event> getAll() {
-        return eventRepo.findAll();
+    public List<EventResponse> getAll() {
+
+        return mapper.toEventResponseList(eventRepo.findAll());
     }
 
-    public Page<Event> getAllPaged(Pageable pageable) {
-        return eventRepo.findAll(pageable);
-    }
+    public Page<epicode.it.events.entities.event.dto.EventResponse> getAllPageable(Pageable pageable) {
 
-    public Page<Event> getAllPageable(Pageable pageable) {
-        return eventRepo.findAll(pageable);
+        Page<Event> pagedEvents = eventRepo.findAll(pageable);
+        Page<epicode.it.events.entities.event.dto.EventResponse> response = pagedEvents.map(e -> {
+            epicode.it.events.entities.event.dto.EventResponse eventResponse = mapper.toEventResponse(e);
+            return eventResponse;
+        });
+        return response;
     }
 
     public Event getById(Long id) {
@@ -60,23 +68,30 @@ public class EventSvc {
         return eventRepo.findFirstByDateAndLocation(date, location);
     }
 
-    public List<Event> findAllByPlanner(Long plannerId) {
+    public List<EventResponse> findAllByPlanner(Long plannerId) {
         Planner p = plannerRepo.findById(plannerId).orElseThrow(() -> new EntityNotFoundException("Planner not found"));
-        return eventRepo.findAllByPlanner(p);
+        return mapper.toEventResponseList(eventRepo.findAllByPlanner(p));
     }
 
-    public Event create(@Valid EventCreateRequest request) {
+    @Transactional
+    public EventResponse create(@Valid EventCreateRequest request) {
+        Planner p = plannerRepo.findById(request.getPlannerId()).orElseThrow(() -> new EntityNotFoundException("Planner not found"));
+
         if (eventRepo.existsByDateAndLocation(request.getDate(), request.getLocation()))
             throw new EntityExistsException("Event already exists");
+
+        if (eventRepo.existsByPlannerAndDate(p, request.getDate()))
+            throw new EntityExistsException("Planner already has an event for this date");
+
         Event event = new Event();
         BeanUtils.copyProperties(request, event);
-        event.setPlanner(plannerRepo.findById(request.getPlannerId()).orElseThrow(() -> new EntityNotFoundException("Planner not found")));
-        return eventRepo.save(event);
+        event.setPlanner(p);
+        return mapper.toEventResponse(eventRepo.save(event));
     }
 
-    public Event update(Long id, @Valid EventUpdateRequest request) {
+    public EventResponse update(Long id, @Valid EventUpdateRequest request) {
         Event e = getById(id);
         BeanUtils.copyProperties(request, e);
-        return eventRepo.save(e);
+        return mapper.toEventResponse(eventRepo.save(e));
     }
 }

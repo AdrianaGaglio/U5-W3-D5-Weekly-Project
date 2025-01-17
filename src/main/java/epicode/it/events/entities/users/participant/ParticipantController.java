@@ -1,8 +1,7 @@
 package epicode.it.events.entities.users.participant;
 
-import epicode.it.events.entities.users.EventUser.EventUserSvc;
-import epicode.it.events.entities.users.EventUser.dto.EventUserCreateRequest;
-import epicode.it.events.entities.users.EventUser.dto.EventUserUpdateRequest;
+import epicode.it.events.entities.users.participant.dto.ParticipantResponse;
+import epicode.it.events.entities.users.participant.dto.ParticipantResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,20 +16,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ParticipantController {
     private final ParticipantSvc participantSvc;
+    private final ParticipantResponseMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<Participant>> getAll() {
+    public ResponseEntity<List<ParticipantResponse>> getAll() {
         return ResponseEntity.ok(participantSvc.getAll());
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<Page<Participant>> getAllPageable(Pageable pageable) {
+    public ResponseEntity<Page<ParticipantResponse>> getAllPageable(Pageable pageable) {
         return ResponseEntity.ok(participantSvc.getAllPageable(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Participant> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(participantSvc.getById(id));
+    public ResponseEntity<ParticipantResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(mapper.toParticipantResponse(participantSvc.getById(id)));
     }
 
     @DeleteMapping("/{id}")

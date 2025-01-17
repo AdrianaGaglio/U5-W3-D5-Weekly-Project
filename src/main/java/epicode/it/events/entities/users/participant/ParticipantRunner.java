@@ -10,12 +10,14 @@ import epicode.it.events.entities.users.planner.PlannerSvc;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class ParticipantRunner implements ApplicationRunner {
     private final EventUserSvc eventUserSvc;
     private final ParticipantSvc participantSvc;

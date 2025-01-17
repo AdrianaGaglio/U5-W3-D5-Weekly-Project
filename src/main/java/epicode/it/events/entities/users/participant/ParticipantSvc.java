@@ -1,13 +1,11 @@
 package epicode.it.events.entities.users.participant;
 
-import epicode.it.events.entities.users.EventUser.dto.EventUserCreateRequest;
-import epicode.it.events.entities.users.EventUser.dto.EventUserUpdateRequest;
-import epicode.it.events.entities.users.utils.Utils;
-import jakarta.persistence.EntityExistsException;
+import epicode.it.events.entities.users.participant.dto.ParticipantResponse;
+import epicode.it.events.entities.users.participant.dto.ParticipantResponseMapper;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,15 +18,20 @@ import java.util.List;
 @Validated
 public class ParticipantSvc {
     private final ParticipantRepo participantRepo;
+    private final ParticipantResponseMapper mapper;
 
-    public List<Participant> getAll() {
+    public List<ParticipantResponse> getAll() {
 
-        return participantRepo.findAll();
+        return mapper.toParticipantResponseList(participantRepo.findAll());
     }
 
-    public Page<Participant> getAllPageable(Pageable pageable) {
-
-        return participantRepo.findAll(pageable);
+    public Page<ParticipantResponse> getAllPageable(Pageable pageable) {
+        Page<Participant> pagedParticipant = participantRepo.findAll(pageable);
+        Page<ParticipantResponse> response = pagedParticipant.map(e -> {
+            ParticipantResponse participantResponse = mapper.toParticipantResponse(e);
+            return participantResponse;
+        });
+        return response;
     }
 
     public Participant getById(Long id) {
@@ -51,7 +54,7 @@ public class ParticipantSvc {
         return "Participant deleted successfully";
     }
 
-    public List<Participant> findByEventId(Long id) {
-        return participantRepo.findByEventId(id);
+    public List<ParticipantResponse> findByEventId(Long id) {
+        return mapper.toParticipantResponseList(participantRepo.findByEventId(id));
     }
 }

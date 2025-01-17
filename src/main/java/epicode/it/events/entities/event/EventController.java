@@ -1,6 +1,8 @@
 package epicode.it.events.entities.event;
 
 import epicode.it.events.entities.event.dto.EventCreateRequest;
+import epicode.it.events.entities.event.dto.EventResponse;
+import epicode.it.events.entities.event.dto.EventResponseMapper;
 import epicode.it.events.entities.event.dto.EventUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,20 +18,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventController {
     private final EventSvc eventSvc;
+    private final EventResponseMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<Event>> getAll() {
+    public ResponseEntity<List<EventResponse>> getAll() {
         return ResponseEntity.ok(eventSvc.getAll());
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<Page<Event>> getAllPageable(Pageable pageable) {
+    public ResponseEntity<Page<EventResponse>> getAllPageable(Pageable pageable) {
         return ResponseEntity.ok(eventSvc.getAllPageable(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Event> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(eventSvc.getById(id));
+    public ResponseEntity<EventResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(mapper.toEventResponse(eventSvc.getById(id)));
     }
 
     @DeleteMapping("/{id}")
@@ -38,17 +41,17 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Event> create(@RequestBody EventCreateRequest request) {
+    public ResponseEntity<EventResponse> create(@RequestBody EventCreateRequest request) {
         return new ResponseEntity<>(eventSvc.create(request), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Event> update(@PathVariable Long id, @RequestBody EventUpdateRequest request) {
+    public ResponseEntity<EventResponse> update(@PathVariable Long id, @RequestBody EventUpdateRequest request) {
         return new ResponseEntity<>(eventSvc.update(id, request), HttpStatus.OK);
     }
 
     @GetMapping("/by-planner/{plannerId}")
-    public ResponseEntity<List<Event>> getAllByPlanner(@PathVariable Long plannerId) {
+    public ResponseEntity<List<EventResponse>> getAllByPlanner(@PathVariable Long plannerId) {
         return ResponseEntity.ok(eventSvc.findAllByPlanner(plannerId));
     }
 }

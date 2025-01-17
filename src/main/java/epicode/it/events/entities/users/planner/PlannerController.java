@@ -1,9 +1,7 @@
 package epicode.it.events.entities.users.planner;
 
-import epicode.it.events.entities.users.EventUser.EventUser;
-import epicode.it.events.entities.users.EventUser.EventUserSvc;
-import epicode.it.events.entities.users.EventUser.dto.EventUserCreateRequest;
-import epicode.it.events.entities.users.EventUser.dto.EventUserUpdateRequest;
+import epicode.it.events.entities.users.planner.dto.PlannerResponse;
+import epicode.it.events.entities.users.planner.dto.PlannerResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,20 +16,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlannerController {
     private final PlannerSvc plannerSvc;
+    private final PlannerResponseMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<Planner>> getAll() {
+    public ResponseEntity<List<PlannerResponse>> getAll() {
         return ResponseEntity.ok(plannerSvc.getAll());
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<Page<Planner>> getAllPageable(Pageable pageable) {
+    public ResponseEntity<Page<PlannerResponse>> getAllPageable(Pageable pageable) {
         return ResponseEntity.ok(plannerSvc.getAllPageable(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Planner> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(plannerSvc.getById(id));
+    public ResponseEntity<PlannerResponse> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(mapper.toPlannerResponse(plannerSvc.getById(id)));
     }
 
     @DeleteMapping("/{id}")

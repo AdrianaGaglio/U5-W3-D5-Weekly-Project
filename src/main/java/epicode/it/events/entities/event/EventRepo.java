@@ -13,4 +13,6 @@ public interface EventRepo extends JpaRepository<Event, Long> {
     public boolean existsByDateAndLocation(LocalDate date, String location);
 
     public List<Event> findAllByPlanner(Planner planner);
+
+    public boolean existsByPlannerAndDate(Planner planner, LocalDate date);
 }
