@@ -95,7 +95,7 @@ public class EventSvc {
         event.setPlanner(p);
         EventResponse response = mapper.toEventResponse(eventRepo.save(event));
 
-        EmailRequest emailRequest = emailMapper.toEmailRequestFromNewEvent(response, "Events <events@epicode.it>");
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromNewEvent(response, "events@epicode.it");
         email.sendEmail(emailRequest);
         return response;
     }
@@ -104,7 +104,7 @@ public class EventSvc {
         Event e = getById(id);
         BeanUtils.copyProperties(request, e);
         EventResponse response = mapper.toEventResponse(eventRepo.save(e));
-        EmailRequest emailRequest = emailMapper.toEmailRequestFromUpdateEvent(response, "Events <events@epicode.it>");
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromUpdateEvent(response, "events@epicode.it");
         email.sendEmail(emailRequest);
         return response;
     }
@@ -117,7 +117,7 @@ public class EventSvc {
         e.getParticipants().add((Participant) user);
         eventRepo.save(e);
         String subject = "Event booked successfully";
-        EmailRequest emailRequest = emailMapper.toEmailRequestFromBooking(e, user, "Events <events@epicode.it>", subject);
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromBooking(e, user, "events@epicode.it", subject);
         email.sendEmail(emailRequest);
         return subject;
     }
@@ -128,7 +128,7 @@ public class EventSvc {
         e.getParticipants().remove(user);
         eventRepo.save(e);
         String subject = "Booking cancelled successfully";
-        EmailRequest emailRequest = emailMapper.toEmailRequestFromBooking(e, user, "Events <events@epicode.it>", subject);
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromBooking(e, user, "events@epicode.it", subject);
         email.sendEmail(emailRequest);
         return subject;
     }

@@ -2,6 +2,9 @@ package epicode.it.events.entities.event;
 
 import epicode.it.events.auth.jwt.JwtRequestFilter;
 import epicode.it.events.entities.event.dto.*;
+import epicode.it.events.entities.users.EventUser.EventUser;
+import epicode.it.events.entities.users.EventUser.EventUserRepo;
+import epicode.it.events.entities.users.participant.Participant;
 import epicode.it.events.entities.users.planner.Planner;
 import epicode.it.events.entities.users.planner.PlannerSvc;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +36,7 @@ public class EventController {
     private final EventSvc eventSvc;
     private final EventResponseMapper mapper;
     private final PlannerSvc plannerSvc;
+    private final EventUserRepo eventUserRepo;
 
     @GetMapping
     public ResponseEntity<List<EventResponse>> getAll() {
@@ -119,7 +123,22 @@ public class EventController {
     }
 
     @PutMapping("/delete-booking/{id}")
+    @PreAuthorize("hasRole('ADMIN') || isAuthenticated()")
     public ResponseEntity<String> undoBooking(@PathVariable Long id, @RequestBody BookingRequest request) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        StringBuilder roles = new StringBuilder();
+        authentication.getAuthorities().forEach(authority -> roles.append(authority.getAuthority()).append(""));
+        if (!roles.toString().contains("ROLE_ADMIN")) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            Event e = eventSvc.getById(id);
+            EventUser p = eventUserRepo.findByUsername(username);
+            if (!e.getParticipants().contains((Participant) p)) {
+                throw new AccessDeniedException("You cannot access this event");
+            }
+        }
+
         return new ResponseEntity<>(eventSvc.undoBooking(id, request), HttpStatus.OK);
     }
 
