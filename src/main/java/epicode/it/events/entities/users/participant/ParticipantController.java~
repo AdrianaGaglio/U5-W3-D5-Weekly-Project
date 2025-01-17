@@ -23,7 +23,7 @@ public class ParticipantController {
         return ResponseEntity.ok(participantSvc.getAll());
     }
 
-    @GetMapping("/paged")
+    @GetMapping
     public ResponseEntity<Page<Participant>> getAllPageable(Pageable pageable) {
         return ResponseEntity.ok(participantSvc.getAllPageable(pageable));
     }

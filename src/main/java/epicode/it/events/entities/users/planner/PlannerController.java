@@ -18,7 +18,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PlannerController {
     private final PlannerSvc plannerSvc;
-    private final EventUserSvc eventUserSvc;
 
     @GetMapping
     public ResponseEntity<List<Planner>> getAll() {
@@ -38,16 +37,5 @@ public class PlannerController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {
         return new ResponseEntity<>(plannerSvc.delete(id), HttpStatus.NO_CONTENT);
-    }
-
-    @PostMapping
-    public ResponseEntity<Planner> create(@RequestBody EventUserCreateRequest request) {
-        return new ResponseEntity<>((Planner) eventUserSvc.create(request, true), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Planner> update(@PathVariable Long id, @RequestBody EventUserUpdateRequest
-            request) {
-        return new ResponseEntity<>((Planner) eventUserSvc.update(id, request), HttpStatus.OK);
     }
 }

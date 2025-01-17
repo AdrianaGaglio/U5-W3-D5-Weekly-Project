@@ -17,4 +17,5 @@ public class EventUserCreateRequest {
     private String surname;
 
     private String image;
+
 }
