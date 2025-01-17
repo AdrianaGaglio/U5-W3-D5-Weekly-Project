@@ -1,5 +1,6 @@
 package epicode.it.events.entities.users.planner;
 
+import epicode.it.events.entities.event.Event;
 import epicode.it.events.entities.users.planner.dto.PlannerResponse;
 import epicode.it.events.entities.users.planner.dto.PlannerResponseMapper;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +9,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,8 +44,21 @@ public class PlannerController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') || hasRole('PLANNER')")
     public ResponseEntity<String> delete(@PathVariable Long id) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        StringBuilder roles = new StringBuilder();
+        authentication.getAuthorities().forEach(authority -> roles.append(authority.getAuthority()).append(""));
+        if (!roles.toString().contains("ROLE_ADMIN")) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            Planner p = plannerSvc.getById(id);
+            if (!p.getAppUser().getUsername().equals(username)) {
+                throw new AccessDeniedException("You cannot access this event");
+            }
+        }
+
         return new ResponseEntity<>(plannerSvc.delete(id), HttpStatus.NO_CONTENT);
     }
 }

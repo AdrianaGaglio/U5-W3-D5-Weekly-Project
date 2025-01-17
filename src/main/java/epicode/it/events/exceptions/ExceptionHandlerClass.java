@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,11 @@ public class ExceptionHandlerClass extends ResponseEntityExceptionHandler {
     protected ResponseEntity<ErrorMessage> handleMissingInformation(MissingInformationException ex) {
         ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
+    }
+
+    protected ResponseEntity<ErrorMessage> handeAccessDenied(AccessDeniedException ex) {
+        ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(BookingExistsException.class)

@@ -1,7 +1,9 @@
 package epicode.it.events.auth.jwt;
 
 import epicode.it.events.auth.appuser.CustomUserDetailsService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,12 +17,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component // Indica che questa classe è un componente Spring.
 @RequiredArgsConstructor // Genera un costruttore con tutti i campi final automaticamente.
 public class JwtRequestFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService; // Gestisce il caricamento degli utenti.
     private final JwtTokenUtil jwtTokenUtil; // Gestisce la validazione e l'estrazione di dati dai token JWT.
+
+    public static void extractToken() {
+    }
 
     /**
      * Metodo principale del filtro, eseguito per ogni richiesta.
@@ -74,5 +80,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
         // Continua la catena di filtri.
         chain.doFilter(request, response);
+    }
+
+    public static String extractUsername(String token, String secretKey) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes()) // Usa la chiave segreta
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject(); // Generalmente lo username è salvato come "subject"
+    }
+
+    public static List<String> extractRoles(String token, String secretKey) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes()) // Usa la chiave segreta
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        // Supponiamo che i ruoli siano salvati sotto il claim "roles" come lista
+        return claims.get("roles", List.class);
     }
 }

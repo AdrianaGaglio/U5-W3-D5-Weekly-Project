@@ -2,13 +2,17 @@ package epicode.it.events.entities.users.participant;
 
 import epicode.it.events.entities.users.participant.dto.ParticipantResponse;
 import epicode.it.events.entities.users.participant.dto.ParticipantResponseMapper;
+import epicode.it.events.entities.users.planner.Planner;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,8 +41,20 @@ public class ParticipantController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') || hasRole('PARTICIPANT')")
     public ResponseEntity<String> delete(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        StringBuilder roles = new StringBuilder();
+        authentication.getAuthorities().forEach(authority -> roles.append(authority.getAuthority()).append(""));
+        if (!roles.toString().contains("ROLE_ADMIN")) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            Participant p = participantSvc.getById(id);
+            if (!p.getAppUser().getUsername().equals(username)) {
+                throw new AccessDeniedException("You cannot access this event");
+            }
+        }
+
         return new ResponseEntity<>(participantSvc.delete(id), HttpStatus.NO_CONTENT);
     }
 }
