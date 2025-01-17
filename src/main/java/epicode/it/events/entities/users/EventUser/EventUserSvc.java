@@ -73,7 +73,8 @@ public class EventUserSvc {
         BeanUtils.copyProperties(request, u);
         boolean hasImage = request.getImage() != null && !request.getImage().isEmpty();
         u.setImage(hasImage ? request.getImage() : Utils.getAvatar(u));
-        u.setAppUser(appUserRepo.findById(request.getUserId()).orElse(null));
+        if (request.getUserId() != null)
+            u.setAppUser(appUserRepo.findById(request.getUserId()).orElse(null));
         return mapper.toEventUserResponse(eventUserRepo.save(u));
     }
 

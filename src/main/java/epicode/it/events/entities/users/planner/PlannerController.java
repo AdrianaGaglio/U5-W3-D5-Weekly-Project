@@ -3,6 +3,7 @@ package epicode.it.events.entities.users.planner;
 import epicode.it.events.entities.users.planner.dto.PlannerResponse;
 import epicode.it.events.entities.users.planner.dto.PlannerResponseMapper;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class PlannerController {
 
     @GetMapping("/paged")
     @PreAuthorize("hasRole('ADMIN') || hasRole('PLANNER')")
-    public ResponseEntity<Page<PlannerResponse>> getAllPageable(Pageable pageable) {
+    public ResponseEntity<Page<PlannerResponse>> getAllPageable(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(plannerSvc.getAllPageable(pageable));
     }
 

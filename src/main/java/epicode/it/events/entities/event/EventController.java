@@ -3,6 +3,7 @@ package epicode.it.events.entities.event;
 import epicode.it.events.entities.event.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.connector.Response;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class EventController {
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<Page<EventResponse>> getAllPageable(Pageable pageable) {
+    public ResponseEntity<Page<EventResponse>> getAllPageable(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(eventSvc.getAllPageable(pageable));
     }
 

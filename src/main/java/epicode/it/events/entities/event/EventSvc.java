@@ -8,6 +8,9 @@ import epicode.it.events.entities.users.participant.ParticipantSvc;
 import epicode.it.events.entities.users.planner.Planner;
 import epicode.it.events.entities.users.planner.PlannerRepo;
 import epicode.it.events.exceptions.BookingExistsException;
+import epicode.it.events.utils.email.EmailRequest;
+import epicode.it.events.utils.email.EmailRequestMapper;
+import epicode.it.events.utils.email.EmailSvc;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -30,6 +33,8 @@ public class EventSvc {
     private final PlannerRepo plannerRepo;
     private final EventResponseMapper mapper;
     private final ParticipantSvc participantSvc;
+    private final EmailSvc email;
+    private final EmailRequestMapper emailMapper;
 
     public List<EventResponse> getAll() {
 
@@ -88,24 +93,33 @@ public class EventSvc {
         Event event = new Event();
         BeanUtils.copyProperties(request, event);
         event.setPlanner(p);
-        return mapper.toEventResponse(eventRepo.save(event));
+        EventResponse response = mapper.toEventResponse(eventRepo.save(event));
+
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromNewEvent(response, "Events <events@epicode.it>");
+        email.sendEmail(emailRequest);
+        return response;
     }
 
     public EventResponse update(Long id, @Valid EventUpdateRequest request) {
         Event e = getById(id);
         BeanUtils.copyProperties(request, e);
-        return mapper.toEventResponse(eventRepo.save(e));
+        EventResponse response = mapper.toEventResponse(eventRepo.save(e));
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromUpdateEvent(response, "Events <events@epicode.it>");
+        email.sendEmail(emailRequest);
+        return response;
     }
 
     public String bookEvent(Long id, @Valid BookingRequest request) {
-        System.out.println("===> " + request);
         Event e = getById(id);
         EventUser user = participantSvc.getById(request.getUserId());
         if (e.getParticipants().contains(user)) throw new BookingExistsException("User already booked this event");
         if (e.getMaxCapacity() == e.getParticipants().size()) throw new BookingExistsException("Event is full");
         e.getParticipants().add((Participant) user);
         eventRepo.save(e);
-        return "Event booked successfully";
+        String subject = "Event booked successfully";
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromBooking(e, user, "Events <events@epicode.it>", subject);
+        email.sendEmail(emailRequest);
+        return subject;
     }
 
     public String undoBooking(Long id, @Valid BookingRequest request) {
@@ -113,7 +127,10 @@ public class EventSvc {
         EventUser user = participantSvc.getById(request.getUserId());
         e.getParticipants().remove(user);
         eventRepo.save(e);
-        return "Booking cancelled successfully";
+        String subject = "Booking cancelled successfully";
+        EmailRequest emailRequest = emailMapper.toEmailRequestFromBooking(e, user, "Events <events@epicode.it>", subject);
+        email.sendEmail(emailRequest);
+        return subject;
     }
 
     public List<EventResponse> findAllByParticipant(Long participantId) {

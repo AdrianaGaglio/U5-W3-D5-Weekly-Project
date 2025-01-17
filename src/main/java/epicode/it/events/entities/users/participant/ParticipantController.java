@@ -3,6 +3,7 @@ package epicode.it.events.entities.users.participant;
 import epicode.it.events.entities.users.participant.dto.ParticipantResponse;
 import epicode.it.events.entities.users.participant.dto.ParticipantResponseMapper;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class ParticipantController {
     }
 
     @GetMapping("/paged")
-    public ResponseEntity<Page<ParticipantResponse>> getAllPageable(Pageable pageable) {
+    public ResponseEntity<Page<ParticipantResponse>> getAllPageable(@ParameterObject Pageable pageable) {
         return ResponseEntity.ok(participantSvc.getAllPageable(pageable));
     }
 
