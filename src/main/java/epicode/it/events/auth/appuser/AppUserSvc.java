@@ -2,6 +2,8 @@ package epicode.it.events.auth.appuser;
 
 
 import epicode.it.events.auth.configurations.PwdEncoder;
+import epicode.it.events.auth.dto.AuthResponse;
+import epicode.it.events.auth.dto.IAppUserResponse;
 import epicode.it.events.auth.dto.LoginRequest;
 import epicode.it.events.auth.dto.RegisterRequest;
 import epicode.it.events.auth.jwt.JwtTokenUtil;
@@ -63,7 +65,7 @@ public class AppUserSvc {
         appUser.setPassword(encoder.passwordEncoder().encode(request.getPassword()));
         appUser.setRoles(roles); // Imposta i ruoli per l'utente.
 
-        appUser=appUserRepo.save(appUser);
+        appUser = appUserRepo.save(appUser);
 
         if (request.getEventUserCreateRequest() != null) {
             EventUserCreateRequest userRequest = request.getEventUserCreateRequest();
@@ -74,8 +76,6 @@ public class AppUserSvc {
 
         // Salva l'utente nel database e restituisce l'oggetto salvato.
         return appUser;
-
-
     }
 
     //    /**
@@ -93,6 +93,10 @@ public class AppUserSvc {
         return appUserRepo.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
+    public IAppUserResponse findIAppUserResponseByUsername(String username) {
+        return appUserRepo.findIAppUserResponseByUsername(username);
+    }
+
 
     //    /**
 //     * Autentica un utente e genera un token JWT se l'autenticazione ha successo.
@@ -100,7 +104,7 @@ public class AppUserSvc {
 //     * @param password La password.
 //     * @return Un token JWT valido.
 //     */
-    public String authenticateUser(@Valid LoginRequest request) {
+    public AuthResponse authenticateUser(@Valid LoginRequest request) {
         try {
 
             boolean hasUsername = request.getUsername() != null && !request.getUsername().isEmpty();
@@ -117,7 +121,8 @@ public class AppUserSvc {
             // Recupera i dettagli dell'utente autenticato.
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             // Genera un token JWT per l'utente autenticato.
-            return jwtTokenUtil.generateToken(userDetails);
+
+            return new AuthResponse(jwtTokenUtil.generateToken(userDetails), findIAppUserResponseByUsername(request.getUsername()));
         } catch (AuthenticationException e) {
             // Lancia un'eccezione di sicurezza se l'autenticazione fallisce.
             throw new SecurityException("Invalid credentials", e);

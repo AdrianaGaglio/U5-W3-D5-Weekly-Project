@@ -1,0 +1,8 @@
+package epicode.it.events.auth.dto;
+
+public interface IAppUserResponse {
+    Long getId();
+    String getUsername();
+    String getEmail();
+    
+}

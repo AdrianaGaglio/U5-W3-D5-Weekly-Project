@@ -33,7 +33,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
-        String token = appUserSvc.authenticateUser(loginRequest);
-        return ResponseEntity.ok(new AuthResponse(token));
+        return ResponseEntity.ok(appUserSvc.authenticateUser(loginRequest));
     }
 }
