@@ -1,14 +1,13 @@
 package epicode.it.events.entities.users.EventUser;
 
 import epicode.it.events.auth.appuser.AppUserRepo;
-import epicode.it.events.auth.appuser.AppUserSvc;
 import epicode.it.events.entities.users.EventUser.dto.EventUserCreateRequest;
 import epicode.it.events.entities.users.EventUser.dto.EventUserMapper;
 import epicode.it.events.entities.users.EventUser.dto.EventUserResponse;
 import epicode.it.events.entities.users.EventUser.dto.EventUserUpdateRequest;
 import epicode.it.events.entities.users.participant.Participant;
 import epicode.it.events.entities.users.planner.Planner;
-import epicode.it.events.entities.users.utils.Utils;
+import epicode.it.events.utils.Utils;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;

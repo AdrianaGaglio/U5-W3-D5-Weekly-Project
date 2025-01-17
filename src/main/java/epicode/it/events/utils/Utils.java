@@ -1,5 +1,6 @@
-package epicode.it.events.entities.users.utils;
+package epicode.it.events.utils;
 
+import epicode.it.events.entities.event.Event;
 import epicode.it.events.entities.users.EventUser.EventUser;
 
 public class Utils {

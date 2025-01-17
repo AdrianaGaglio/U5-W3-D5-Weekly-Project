@@ -1,12 +1,13 @@
 package epicode.it.events.entities.event;
 
 
-import epicode.it.events.entities.event.dto.EventCreateRequest;
-import epicode.it.events.entities.event.dto.EventResponse;
-import epicode.it.events.entities.event.dto.EventResponseMapper;
-import epicode.it.events.entities.event.dto.EventUpdateRequest;
+import epicode.it.events.entities.event.dto.*;
+import epicode.it.events.entities.users.EventUser.EventUser;
+import epicode.it.events.entities.users.participant.Participant;
+import epicode.it.events.entities.users.participant.ParticipantSvc;
 import epicode.it.events.entities.users.planner.Planner;
 import epicode.it.events.entities.users.planner.PlannerRepo;
+import epicode.it.events.exceptions.BookingExistsException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -28,6 +29,7 @@ public class EventSvc {
     private final EventRepo eventRepo;
     private final PlannerRepo plannerRepo;
     private final EventResponseMapper mapper;
+    private final ParticipantSvc participantSvc;
 
     public List<EventResponse> getAll() {
 
@@ -93,5 +95,28 @@ public class EventSvc {
         Event e = getById(id);
         BeanUtils.copyProperties(request, e);
         return mapper.toEventResponse(eventRepo.save(e));
+    }
+
+    public String bookEvent(Long id, @Valid BookingRequest request) {
+        System.out.println("===> " + request);
+        Event e = getById(id);
+        EventUser user = participantSvc.getById(request.getUserId());
+        if (e.getParticipants().contains(user)) throw new BookingExistsException("User already booked this event");
+        if (e.getMaxCapacity() == e.getParticipants().size()) throw new BookingExistsException("Event is full");
+        e.getParticipants().add((Participant) user);
+        eventRepo.save(e);
+        return "Event booked successfully";
+    }
+
+    public String undoBooking(Long id, @Valid BookingRequest request) {
+        Event e = getById(id);
+        EventUser user = participantSvc.getById(request.getUserId());
+        e.getParticipants().remove(user);
+        eventRepo.save(e);
+        return "Booking cancelled successfully";
+    }
+
+    public List<EventResponse> findAllByParticipant(Long participantId) {
+        return mapper.toEventResponseList(eventRepo.findEventsByParticipantId(participantId));
     }
 }
