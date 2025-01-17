@@ -1,0 +1,18 @@
+package epicode.it.events.entities.users.participant;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+public class ParticipantCreateRequest {
+    private String name;
+    private String surname;
+    private String image;
+
+    public Participant toParticipant(String name, String surname) {
+        this.name = name;
+        this.surname = surname;
+        this.image = 
+    }
+}

@@ -1,0 +1,15 @@
+package epicode.it.events.entities;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Data
+@Entity
+@NamedQuery(name="findAll_Event", query="SELECT a FROM Event a")
+public class Event {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    private  Long id;
+
+
+}

@@ -1,0 +1,4 @@
+package epicode.it.events.exceptions;
+
+public class ErrorMessage {
+}
