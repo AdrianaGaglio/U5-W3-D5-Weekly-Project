@@ -1,5 +1,6 @@
 package epicode.it.events.entities.users.EventUser;
 
+import epicode.it.events.auth.appuser.AppUser;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,8 @@ public class EventUser {
 
     private String image;
 
-
+    @OneToOne
+    @JoinColumn(name = "user_id",  unique = true)
+    private AppUser appUser;
 
 }

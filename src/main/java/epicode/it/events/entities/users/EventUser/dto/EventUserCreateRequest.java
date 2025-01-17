@@ -18,4 +18,6 @@ public class EventUserCreateRequest {
 
     private String image;
 
+    private Long userId;
+
 }

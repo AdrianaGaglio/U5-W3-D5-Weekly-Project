@@ -1,5 +1,7 @@
 package epicode.it.events.entities.users.EventUser;
 
+import epicode.it.events.auth.appuser.AppUserRepo;
+import epicode.it.events.auth.appuser.AppUserSvc;
 import epicode.it.events.entities.users.EventUser.dto.EventUserCreateRequest;
 import epicode.it.events.entities.users.EventUser.dto.EventUserUpdateRequest;
 import epicode.it.events.entities.users.participant.Participant;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventUserSvc {
     private final EventUserRepo eventUserRepo;
+    private final AppUserRepo appUserRepo;
 
     public List<EventUser> getAll() {
         return eventUserRepo.findAll();
@@ -63,6 +66,7 @@ public class EventUserSvc {
         BeanUtils.copyProperties(request, u);
         boolean hasImage = request.getImage() != null && !request.getImage().isEmpty();
         u.setImage(hasImage ? request.getImage() : Utils.getAvatar(u));
+        u.setAppUser(appUserRepo.findById(request.getUserId()).orElse(null));
         return eventUserRepo.save(u);
     }
 
