@@ -36,6 +36,7 @@ public class ExceptionHandlerClass extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<ErrorMessage> handeAccessDenied(AccessDeniedException ex) {
         ErrorMessage errorMessage = new ErrorMessage(ex.getMessage(), HttpStatus.FORBIDDEN);
         return new ResponseEntity<>(errorMessage, HttpStatus.FORBIDDEN);
